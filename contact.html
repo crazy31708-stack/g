@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聯絡我們</title>
+</head>
+<body>
+    <nav>
+        <a href="index.html">首頁</a> | 
+        <a href="about.html">公司介紹</a> | 
+        <a href="contact.html">聯絡我們</a>
+    </nav>
+    <hr>
+
+    <h1>聯絡我們</h1>
+    <p>請填寫您的姓名、電話、EMAIL 與聯絡內容，我們將盡快回覆您：</p>
+
+    <form id="contactForm">
+        <div>
+            <label for="name">姓名：</label><br>
+            <input type="text" id="name" name="name" required>
+        </div><br>
+
+        <div>
+            <label for="phone">電話：</label><br>
+            <input type="tel" id="phone" name="phone" required>
+        </div><br>
+
+        <div>
+            <label for="email">EMAIL：</label><br>
+            <input type="email" id="email" name="email" required>
+        </div><br>
+
+        <div>
+            <label for="message">聯絡內容：</label><br>
+            <textarea id="message" name="message" rows="5" cols="40" required></textarea>
+        </div><br>
+
+        <button type="submit" id="submitBtn">寄出表單</button>
+    </form>
+
+    <p id="statusMsg"></p>
+
+    <script>
+        // Google Apps Script 網址（已綁定寄至 crazy31708@gmail.com）
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyfLxbjvNIaTYBEgep3rj2AZh1npdVfw62Z8jnP-zLGJhvkz8Tnz_lgXpUPnS0ZwMeT/exec";
+
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMsg = document.getElementById('statusMsg');
+            
+            submitBtn.disabled = true;
+            statusMsg.style.color = "blue";
+            statusMsg.textContent = "傳送中...";
+
+            const formData = new FormData(this);
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    statusMsg.style.color = "green";
+                    statusMsg.textContent = "成功送出！信件已寄至指定的信箱。";
+                    document.getElementById('contactForm').reset();
+                } else {
+                    statusMsg.style.color = "red";
+                    statusMsg.textContent = "寄送失敗：" + data.error;
+                }
+            })
+            .catch(error => {
+                statusMsg.style.color = "red";
+                statusMsg.textContent = "發生錯誤，請稍後再試。";
+                console.error(error);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
